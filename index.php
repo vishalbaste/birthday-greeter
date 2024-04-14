@@ -5,3 +5,4 @@ $google =new Google(function($authUrl,$baseUrl)
     echo "<a href='{$authUrl}'><button>Google Auth</button></a>";die;
 });
 
+$google->getContact();

@@ -9,6 +9,7 @@ class Google
     private $config;
     private $token;
     private $authCallback;
+    private $PeopleService;
 
     public function __construct($authCallback = null)
     {
@@ -22,6 +23,7 @@ class Google
             $this->client->setAccessType('offline');
             $this->config = json_decode(file_get_contents(self::tokenAt));
             $this->token  = $this->getToken();
+            $this->client->setAccessToken($this->token);
         }
         else
             array_push($this->errors,['name' => 'file','error' => 'token file not exists']);
@@ -108,5 +110,24 @@ class Google
     public function getConfig()
     {
         return $this->config;
+    }
+
+    public function getContact()
+    {
+        $allConnections = [];
+        $params = ['personFields' => 'names,emailAddresses,birthdays,genders,phoneNumbers', 'pageSize' => 200];
+        $this->client->setAccessToken($this->getToken());
+        $this->PeopleService = new Google_Service_PeopleService($this->client);
+        $results = $this->PeopleService->people_connections->listPeopleConnections('people/me', $params);
+
+        $allConnections = array_merge($allConnections, $results->getConnections());
+        while ($results->getNextPageToken())
+        {
+            $params['pageToken'] = $results->getNextPageToken();
+            $results = $this->PeopleService->people_connections->listPeopleConnections('people/me', $params);
+            $allConnections = array_merge($allConnections, $results->getConnections());
+        }
+        echo '<pre>';
+        print_r($allConnections);
     }
 }
