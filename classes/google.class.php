@@ -114,20 +114,27 @@ class Google
 
     public function getContact()
     {
-        $allConnections = [];
-        $params = ['personFields' => 'names,emailAddresses,birthdays,genders,phoneNumbers', 'pageSize' => 200];
-        $this->client->setAccessToken($this->getToken());
-        $this->PeopleService = new Google_Service_PeopleService($this->client);
-        $results = $this->PeopleService->people_connections->listPeopleConnections('people/me', $params);
-
-        $allConnections = array_merge($allConnections, $results->getConnections());
-        while ($results->getNextPageToken())
+        try
         {
-            $params['pageToken'] = $results->getNextPageToken();
+            $allConnections = [];
+            $params = ['personFields' => 'names,emailAddresses,birthdays,genders,phoneNumbers', 'pageSize' => 200];
+            $this->client->setAccessToken($this->getToken());
+            $this->PeopleService = new Google_Service_PeopleService($this->client);
             $results = $this->PeopleService->people_connections->listPeopleConnections('people/me', $params);
+
             $allConnections = array_merge($allConnections, $results->getConnections());
+            while ($results->getNextPageToken())
+            {
+                $params['pageToken'] = $results->getNextPageToken();
+                $results = $this->PeopleService->people_connections->listPeopleConnections('people/me', $params);
+                $allConnections = array_merge($allConnections, $results->getConnections());
+            }
+            
+            return $allConnections;
         }
-        echo '<pre>';
-        print_r($allConnections);
+        catch(Exception | Error $e)
+        {
+            array_push($this->errors,['name' => 'auth','error' => $e->getMessage()]);
+        }
     }
 }
