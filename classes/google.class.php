@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
-
 class Google
 {
     const tokenAt = __DIR__.'/../token/credentials.json';
